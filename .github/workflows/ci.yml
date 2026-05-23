@@ -1,0 +1,181 @@
+# ===============================================
+# 43V3R CORE - CI/CD Configuration
+# ===========================================
+
+name: 43V3R CORE CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  lint-backend:
+    name: Lint Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          pip install -r requirements.txt
+          pip install ruff
+      
+      - name: Run linter
+        run: |
+          cd apps/api
+          ruff check app/ --output-format=github
+      
+      - name: Check formatting
+        run: |
+          cd apps/api
+          ruff format --check app/
+
+  lint-frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          npm ci
+      
+      - name: Run linter
+        run: |
+          cd apps/web
+          npm run lint
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          npm ci
+      
+      - name: Type check
+        run: |
+          cd apps/web
+          npm run type-check
+
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+      
+      - name: Run tests
+        run: |
+          cd apps/api
+          pytest tests/ -v --cov=app --cov-report=xml
+
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          npm ci
+      
+      - name: Run tests
+        run: |
+          cd apps/web
+          npm run test
+
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [lint-backend, lint-frontend, test-backend, test-frontend]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build API image
+        run: |
+          docker build \
+            -f infrastructure/docker/api.Dockerfile \
+            -t ghcr.io/${{ github.repository }}/api:${{ github.sha }} \
+            .
+      
+      - name: Build Worker image
+        run: |
+          docker build \
+            -f infrastructure/docker/worker.Dockerfile \
+            -t ghcr.io/${{ github.repository }}/worker:${{ github.sha }} \
+            .
+      
+      - name: Build Web image
+        run: |
+          docker build \
+            -f infrastructure/docker/web.Dockerfile \
+            -t ghcr.io/${{ github.repository }}/web:${{ github.sha }} \
+            .

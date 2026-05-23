@@ -1,0 +1,54 @@
+# ===============================================
+# 43V3R CORE API - Python FastAPI Backend
+# ===============================================
+{
+  "name": "@versemusic/api",
+  "version": "1.0.0",
+  "description": "43V3R CORE API - FastAPI Backend",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "start": "uvicorn app.main:app --host 0.0.0.0 --port 8000",
+    "build": "python -m py_compile app/main.py",
+    "lint": "flake8 app --max-line-length=120 --ignore=E501,W503",
+    "format": "black app && isort app",
+    "test": "pytest tests/ -v --cov=app",
+    "type-check": "mypy app",
+    "migrate": "alembic upgrade head",
+    "migrate:create": "alembic revision --autogenerate -m",
+    "seed": "python app/db/seed.py"
+  },
+  "dependencies": {
+    "fastapi": "^0.109.0",
+    "uvicorn": "^0.27.0",
+    "sqlalchemy": "^2.0.25",
+    "alembic": "^1.13.1",
+    "asyncpg": "^0.29.0",
+    "psycopg2-binary": "^2.9.9",
+    "redis": "^5.0.1",
+    "celery": "^5.3.6",
+    "pydantic": "^2.5.3",
+    "pydantic-settings": "^2.1.0",
+    "python-jose": "^3.3.0",
+    "passlib": "^1.7.4",
+    "python-multipart": "^0.0.6",
+    "python-dotenv": "^1.0.0",
+    "httpx": "^0.26.0",
+    "boto3": "^1.34.25",
+    "aioredis": "^2.0.1",
+    "Pillow": "^10.2.0",
+    "ffmpeg-python": "^0.2.0"
+  },
+  "devDependencies": {
+    "pytest": "^7.4.4",
+    "pytest-asyncio": "^0.23.3",
+    "pytest-cov": "^4.1.0",
+    "httpx": "^0.26.0",
+    "black": "^24.1.0",
+    "isort": "^5.13.2",
+    "flake8": "^7.0.0",
+    "mypy": "^1.8.0",
+    "types-redis": "^4.2.12"
+  },
+  "python_requires": ">=3.11"
+}

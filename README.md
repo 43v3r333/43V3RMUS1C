@@ -1,5 +1,5 @@
 # 43V3R CORE
-## Autonomous Media Operating System
+## Enterprise-Grade Autonomous Media Operating System
 
 **Version:** 1.0.0
 
@@ -7,160 +7,137 @@ A production-grade AI-native media and music operating system for content creato
 
 ---
 
-## Overview
+## Monorepo Architecture
 
-43V3R CORE is an enterprise-grade platform for managing, creating, and distributing media content with AI-powered automation.
-
-### Features (Phase 1 - Foundation)
-
-- **Command Center Dashboard** - Real-time overview of operations
-- **Media Library** - Asset management and organization
-- **Content Pipeline** - Production workflow management
-- **AI Agent Orchestration** - Automated task execution
-- **Render Queue** - Video/audio processing management
-- **Analytics System** - Performance tracking and insights
-- **Brand DNA System** - Visual identity management
-- **Distribution Pipeline** - Multi-platform publishing
-- **Prompt Management** - AI template library
-- **System Monitoring** - Infrastructure health
-
----
-
-## Tech Stack
-
-### Backend
-- **Python 3.11+** - Core language
-- **FastAPI** - API framework
-- **SQLAlchemy** - ORM
-- **Alembic** - Database migrations
-- **PostgreSQL** - Primary database
-- **Redis** - Caching and queues
-- **Celery** - Background task processing
-
-### Frontend
-- **Next.js 14** - React framework
-- **TypeScript** - Type safety
-- **TailwindCSS** - Styling
-- **shadcn/ui** - Component library
-- **Framer Motion** - Animations
-- **Zustand** - State management
-- **TanStack Query** - Server state
+```
+43V3RMUS1C/
+├── apps/
+│   ├── api/          # FastAPI backend
+│   └── web/          # Next.js frontend
+├── packages/
+│   ├── ui/           # Shared UI components
+│   ├── types/        # Shared TypeScript types
+│   └── config/       # Shared configurations
+├── infrastructure/   # Docker, nginx, scripts
+├── docs/             # Documentation
+└── package.json      # Monorepo workspace
+```
 
 ---
 
 ## Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose
-- Python 3.11+
 - Node.js 18+
+- Python 3.11+
+- Docker & Docker Compose
 - PostgreSQL 15+
 - Redis 7+
 
-### Development Setup
+### Installation
 
-1. **Clone and setup:**
 ```bash
+# Clone repository
 git clone https://github.com/43v3r333/43V3RMUS1C.git
 cd 43V3RMUS1C
-```
 
-2. **Configure environment:**
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-# Edit .env files with your configuration
-```
+# Install dependencies
+npm install
 
-3. **Start services:**
-```bash
+# Copy environment files
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+
+# Start infrastructure
 docker-compose up -d
+
+# Run migrations
+npm run db:migrate
+
+# Start development
+npm run dev
 ```
 
-4. **Run migrations:**
-```bash
-cd backend
-alembic upgrade head
-```
+### Access Points
+- **Frontend**: http://localhost:3000
+- **API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
 
-5. **Access application:**
-- Frontend: http://localhost:3000
-- API: http://localhost:8000
-- Docs: http://localhost:8000/docs
+---
+
+## Tech Stack
+
+### Backend
+- **Python 3.11+** with FastAPI
+- **SQLAlchemy** for ORM
+- **Alembic** for database migrations
+- **PostgreSQL** as primary database
+- **Redis** for caching and queues
+- **Celery** for background task processing
+
+### Frontend
+- **Next.js 14** with App Router
+- **TypeScript** for type safety
+- **TailwindCSS** for styling
+- **shadcn/ui** for components
+- **Framer Motion** for animations
+- **Zustand** for state management
+- **TanStack Query** for data fetching
 
 ---
 
 ## Project Structure
 
-```
-43V3RMUS1C/
-├── backend/                    # FastAPI backend
-│   ├── app/
-│   │   ├── api/v1/           # API endpoints
-│   │   ├── core/              # Config, security, database
-│   │   ├── models/            # SQLAlchemy models
-│   │   ├── schemas/           # Pydantic schemas
-│   │   ├── repositories/      # Data access layer
-│   │   ├── services/          # Business logic
-│   │   └── workers/           # Celery workers
-│   ├── alembic/               # Database migrations
-│   └── requirements.txt
-│
-├── frontend/                   # Next.js application
-│   ├── src/
-│   │   ├── app/              # App router pages
-│   │   ├── components/       # React components
-│   │   ├── hooks/            # Custom hooks
-│   │   ├── lib/              # Utils and API
-│   │   ├── stores/           # Zustand stores
-│   │   └── types/            # TypeScript types
-│   └── package.json
-│
-├── infrastructure/            # Shared infrastructure
-│   └── scripts/              # Setup scripts
-│
-├── docker-compose.yml        # Container orchestration
-├── .env.example              # Environment template
-└── README.md
-```
+### apps/api/
+- FastAPI application with modular architecture
+- Service layer pattern
+- Repository pattern for data access
+- JWT authentication with refresh tokens
+- Celery workers for background tasks
+
+### apps/web/
+- Next.js 14 App Router
+- Professional dark theme design system
+- Collapsible sidebar navigation
+- Server and client component separation
+- Real-time data with TanStack Query
+
+### packages/ui/
+- Shared React components
+- shadcn/ui based
+- Theme-aware design tokens
+- Production-ready components
+
+### packages/types/
+- Shared TypeScript type definitions
+- API response types
+- Domain models
+- Validation schemas
+
+### packages/config/
+- Shared ESLint/Prettier configs
+- TypeScript base config
+- Build tooling configurations
 
 ---
 
-## API Documentation
-
-Once running, access:
-- **Swagger UI:** `/docs`
-- **ReDoc:** `/redoc`
-
-### Authentication
+## Commands
 
 ```bash
-# Login
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}'
+# Build all packages
+npm run build
 
-# Use token
-curl -H "Authorization: Bearer <token>" http://localhost:8000/api/v1/users/me
-```
+# Run linters
+npm run lint
 
----
+# Type check all packages
+npm run type-check
 
-## Development
+# Format code
+npm run format
 
-### Backend
-```bash
-cd backend
-pip install -r requirements.txt
-alembic upgrade head
-uvicorn app.main:app --reload --port 8000
-```
-
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
+# Clean build artifacts
+npm run clean
 ```
 
 ---
