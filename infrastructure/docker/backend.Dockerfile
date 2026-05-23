@@ -1,5 +1,5 @@
 # ===============================================
-# Python Backend Dockerfile
+# Python Backend Dockerfile - Monorepo Compatible
 # ===============================================
 FROM python:3.11-slim
 
@@ -17,19 +17,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     ffmpeg \
+    libsm6 \
+    libxext6 \
+    libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY backend/requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Copy backend application
-COPY backend/app /app/app
+# Copy application code
+COPY . /app
 
 # Create storage directories
-RUN mkdir -p /app/storage/{media,assets,temp}
+RUN mkdir -p /app/storage/{media,assets,temp} && \
+    useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
 
 # Expose port
 EXPOSE 8000

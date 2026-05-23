@@ -164,18 +164,18 @@ jobs:
           docker build \
             -f infrastructure/docker/api.Dockerfile \
             -t ghcr.io/${{ github.repository }}/api:${{ github.sha }} \
-            .
+            ./apps/api
       
       - name: Build Worker image
         run: |
           docker build \
-            -f infrastructure/docker/worker.Dockerfile \
+            -f infrastructure/docker/api.Dockerfile \
             -t ghcr.io/${{ github.repository }}/worker:${{ github.sha }} \
-            .
+            ./apps/api
       
       - name: Build Web image
         run: |
           docker build \
             -f infrastructure/docker/web.Dockerfile \
             -t ghcr.io/${{ github.repository }}/web:${{ github.sha }} \
-            .
+            ./apps/web

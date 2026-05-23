@@ -1,33 +1,27 @@
 # ===============================================
-# Frontend Dockerfile
+# Frontend Dockerfile - Monorepo Compatible
 # ===============================================
 FROM node:20-alpine AS base
 
-# Install dependencies only when needed
+WORKDIR /app
+
+# Install dependencies stage
 FROM base AS deps
 WORKDIR /app
 
-# Copy package files
-COPY frontend/package.json frontend/pnpm-lock.yaml* ./
+COPY package*.json ./
 
-# Install dependencies
-RUN if [ -f pnpm-lock.yaml ]; then \
-    npm install -g pnpm && pnpm install; \
-    else \
-    npm install; \
-    fi
+RUN npm install
 
-# Development image
+# Development stage
 FROM base AS development
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY frontend .
+COPY . .
 
-# Expose port
 EXPOSE 3000
 
-# Start development server
 CMD ["npm", "run", "dev"]
 
 # Production build stage
@@ -35,11 +29,11 @@ FROM base AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY frontend .
+COPY . .
 
 RUN npm run build
 
-# Production image
+# Production stage
 FROM base AS production
 WORKDIR /app
 

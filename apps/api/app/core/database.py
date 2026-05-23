@@ -90,8 +90,22 @@ def get_db_context() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
+
+
+@contextmanager
+def get_db_session():
+    """
+    Simple context manager for workers to use sync sessions.
+    Wraps get_db_context for backward compatibility.
+    """
+    with get_db_context() as db:
+        yield db
 
 
 async def init_db() -> None:
@@ -108,8 +122,9 @@ async def close_db() -> None:
 async def check_db_connection() -> bool:
     """Check if database connection is healthy"""
     try:
+        from sqlalchemy import text
         async with async_engine.connect() as conn:
-            await conn.execute("SELECT 1")
+            await conn.execute(text("SELECT 1"))
         return True
     except Exception as e:
         logger.error(f"Database connection check failed: {e}")
