@@ -1,51 +1,58 @@
 # ===============================================
 # Docker Compose - Development Environment
 # ===============================================
-version: '3.8'
+# 43V3R CORE - Monorepo Architecture
+# Services: PostgreSQL, Redis, API, Workers, Frontend
+# ===============================================
 
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
-    container_name: versemusic-db
+    image: postgres:16-alpine
+    container_name: verse-postgres
     environment:
-      POSTGRES_DB: versemusic
-      POSTGRES_USER: versemusic
-      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: verse
+      POSTGRES_USER: verse
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U versemusic"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U verse"]
+      interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - verse-network
 
-  # Redis Cache
+  # Redis Cache & Message Broker
   redis:
     image: redis:7-alpine
-    container_name: versemusic-redis
+    container_name: verse-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - verse-network
 
-  # Backend API
-  backend:
+  # API Backend
+  api:
     build:
-      context: ./backend
-      dockerfile: infrastructure/docker/backend/Dockerfile
-    container_name: versemusic-api
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-api
     environment:
-      - DATABASE_URL=postgresql://versemusic:changeme@postgres:5432/versemusic
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
       - REDIS_URL=redis://redis:6379/0
-      - ENVIRONMENT=development
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-changeme-dev-key}
     ports:
       - "8000:8000"
     depends_on:
@@ -54,86 +61,113 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./backend:/app
+      - ./apps/api:/app
+      - media_storage:/app/storage
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - verse-network
 
-  # Worker - Render Jobs
+  # Render Worker
   worker-render:
     build:
-      context: ./backend
-      dockerfile: infrastructure/docker/worker/Dockerfile
-    container_name: versemusic-worker-render
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-render
     environment:
-      - DATABASE_URL=postgresql://versemusic:changeme@postgres:5432/versemusic
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
       - REDIS_URL=redis://redis:6379/0
       - WORKER_TYPE=render
+      - ENVIRONMENT=${ENVIRONMENT:-development}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
-      - ./backend:/app
-      - media_storage:/storage
-    command: celery -A app.workers.celery_app worker -l info -n render_worker
+      - ./apps/api:/app
+      - media_storage:/app/storage
+    command: celery -A app.workers.celery_app worker -l info -n render_worker -Q render
+    profiles:
+      - workers
+    networks:
+      - verse-network
 
-  # Worker - Social Tasks
+  # Social Tasks Worker
   worker-social:
     build:
-      context: ./backend
-      dockerfile: infrastructure/docker/worker/Dockerfile
-    container_name: versemusic-worker-social
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-social
     environment:
-      - DATABASE_URL=postgresql://versemusic:changeme@postgres:5432/versemusic
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
       - REDIS_URL=redis://redis:6379/0
       - WORKER_TYPE=social
+      - ENVIRONMENT=${ENVIRONMENT:-development}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
-      - ./backend:/app
-    command: celery -A app.workers.celery_app worker -l info -n social_worker
+      - ./apps/api:/app
+    command: celery -A app.workers.celery_app worker -l info -n social_worker -Q social
+    profiles:
+      - workers
+    networks:
+      - verse-network
 
-  # Worker - Analytics
+  # Analytics Worker
   worker-analytics:
     build:
-      context: ./backend
-      dockerfile: infrastructure/docker/worker/Dockerfile
-    container_name: versemusic-worker-analytics
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-analytics
     environment:
-      - DATABASE_URL=postgresql://versemusic:changeme@postgres:5432/versemusic
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
       - REDIS_URL=redis://redis:6379/0
       - WORKER_TYPE=analytics
+      - ENVIRONMENT=${ENVIRONMENT:-development}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
-      - ./backend:/app
-    command: celery -A app.workers.celery_app worker -l info -n analytics_worker
+      - ./apps/api:/app
+    command: celery -A app.workers.celery_app worker -l info -n analytics_worker -Q analytics
+    profiles:
+      - workers
+    networks:
+      - verse-network
 
-  # Frontend
-  frontend:
+  # Frontend Web Application
+  web:
     build:
-      context: ./frontend
-      dockerfile: infrastructure/docker/frontend/Dockerfile
-    container_name: versemusic-frontend
+      context: ./apps/web
+      dockerfile: ../../infrastructure/docker/web.Dockerfile
+    container_name: verse-web
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NODE_ENV=development
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      - api
     volumes:
-      - ./frontend:/app
+      - ./apps/web:/app
       - /app/node_modules
       - /app/.next
     command: npm run dev
+    networks:
+      - verse-network
 
+# Volume definitions
 volumes:
   postgres_data:
   redis_data:
   media_storage:
+
+# Network definitions
+networks:
+  verse-network:
+    driver: bridge
