@@ -1,0 +1,86 @@
+# ===============================================
+# 43V3R CORE - Dependabot Auto-Merge
+# ===============================================
+# Automatically merges Dependabot PRs when CI passes
+
+name: Dependabot Auto-Merge
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+  workflow_run:
+    workflows: ["43V3R CORE CI"]
+    types: [completed]
+
+jobs:
+  # Handle Dependabot PRs when CI workflow completes
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.sender.login == 'dependabot[bot]'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Wait for CI to complete
+        run: |
+          echo "Waiting for 43V3R CORE CI workflow to complete..."
+          
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          
+          # Wait up to 30 minutes for CI
+          MAX_WAIT=1800
+          INTERVAL=30
+          ELAPSED=0
+          
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # Check latest workflow run status
+            STATUS=$(curl -s -u "x-access-token:${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs?head_sha=$HEAD_SHA&per_page=1" | \
+              jq -r '.workflow_runs[0].status // "unknown"')
+            
+            CONCLUSION=$(curl -s -u "x-access-token:${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs?head_sha=$HEAD_SHA&per_page=1" | \
+              jq -r '.workflow_runs[0].conclusion // "pending"')
+            
+            echo "CI Status: $STATUS, Conclusion: $CONCLUSION"
+            
+            if [ "$CONCLUSION" == "success" ]; then
+              echo "✅ CI passed successfully!"
+              break
+            elif [ "$CONCLUSION" == "failure" ] || [ "$CONCLUSION" == "cancelled" ]; then
+              echo "❌ CI failed or was cancelled. Not merging."
+              exit 0
+            elif [ "$STATUS" == "completed" ] && [ "$CONCLUSION" != "success" ]; then
+              echo "❌ CI completed but not successfully ($CONCLUSION). Not merging."
+              exit 0
+            fi
+            
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+          
+          if [ $ELAPSED -ge $MAX_WAIT ]; then
+            echo "⚠️ Timed out waiting for CI. Skipping merge."
+            exit 0
+          fi
+
+      - name: Auto-merge Dependabot PR
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          echo "Attempting to merge PR #$PR_NUMBER..."
+          
+          gh pr merge $PR_NUMBER \
+            --auto \
+            --squash \
+            --delete-branch \
+            --comment "Automatically merged by Dependabot Auto-Merge action"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "Failed to auto-merge. Manual intervention may be required."
