@@ -1,0 +1,154 @@
+# ===============================================
+# Production Docker Compose with Traefik
+# ===============================================
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: versemusic-db
+    environment:
+      POSTGRES_DB: versemusic
+      POSTGRES_USER: versemusic
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U versemusic"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - versemusic-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: versemusic-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - versemusic-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/backend.Dockerfile
+    container_name: versemusic-backend
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=versemusic
+      - POSTGRES_USER=versemusic
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - APP_ENV=production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_storage:/app/storage
+    networks:
+      - versemusic-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.services.api.loadbalancer.server.port=8000"
+
+  worker:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/worker.Dockerfile
+    container_name: versemusic-worker
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=versemusic
+      - POSTGRES_USER=versemusic
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_storage:/app/storage
+    networks:
+      - versemusic-network
+    restart: unless-stopped
+    profiles:
+      - worker
+
+  frontend:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/frontend.Dockerfile
+      target: production
+    container_name: versemusic-frontend
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${API_URL}
+    depends_on:
+      - backend
+    networks:
+      - versemusic-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"
+      - "traefik.http.services.app.loadbalancer.server.port=3000"
+
+  # Traefik reverse proxy
+  traefik:
+    image: traefik:v2.10
+    container_name: versemusic-proxy
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt_data:/letsencrypt
+    networks:
+      - versemusic-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  media_storage:
+    driver: local
+  letsencrypt_data:
+    driver: local
+
+networks:
+  versemusic-network:
+    driver: bridge

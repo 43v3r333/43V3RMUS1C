@@ -1,0 +1,34 @@
+"""
+Git hooks configuration
+"""
+
+# Pre-commit hooks
+hooks:
+  - id: trailing-whitespace
+    name: Trailing whitespace
+    entry: bash -c 'git diff --check'
+    language: system
+    stages: [pre-commit]
+
+  - id: python-imports
+    name: Python import sorting
+    entry: isort
+    language: system
+    types: [python]
+    stages: [pre-commit]
+
+  - id: python-lint
+    name: Python linting
+    entry: flake8
+    language: system
+    types: [python]
+    stages: [pre-commit]
+    args: [--max-line-length=120, --ignore=E501,W503]
+
+  - id: typescript-check
+    name: TypeScript type checking
+    entry: npm run type-check
+    language: system
+    types: [typescript]
+    stages: [pre-commit]
+    pass_filenames: false

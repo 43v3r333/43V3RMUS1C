@@ -1,0 +1,139 @@
+# ===============================================
+# Docker Compose - Development Environment
+# ===============================================
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: versemusic-db
+    environment:
+      POSTGRES_DB: versemusic
+      POSTGRES_USER: versemusic
+      POSTGRES_PASSWORD: changeme
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U versemusic"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: versemusic-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: infrastructure/docker/backend/Dockerfile
+    container_name: versemusic-api
+    environment:
+      - DATABASE_URL=postgresql://versemusic:changeme@postgres:5432/versemusic
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=development
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Worker - Render Jobs
+  worker-render:
+    build:
+      context: ./backend
+      dockerfile: infrastructure/docker/worker/Dockerfile
+    container_name: versemusic-worker-render
+    environment:
+      - DATABASE_URL=postgresql://versemusic:changeme@postgres:5432/versemusic
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=render
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - media_storage:/storage
+    command: celery -A app.workers.celery_app worker -l info -n render_worker
+
+  # Worker - Social Tasks
+  worker-social:
+    build:
+      context: ./backend
+      dockerfile: infrastructure/docker/worker/Dockerfile
+    container_name: versemusic-worker-social
+    environment:
+      - DATABASE_URL=postgresql://versemusic:changeme@postgres:5432/versemusic
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=social
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: celery -A app.workers.celery_app worker -l info -n social_worker
+
+  # Worker - Analytics
+  worker-analytics:
+    build:
+      context: ./backend
+      dockerfile: infrastructure/docker/worker/Dockerfile
+    container_name: versemusic-worker-analytics
+    environment:
+      - DATABASE_URL=postgresql://versemusic:changeme@postgres:5432/versemusic
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=analytics
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: celery -A app.workers.celery_app worker -l info -n analytics_worker
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: infrastructure/docker/frontend/Dockerfile
+    container_name: versemusic-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_storage:
