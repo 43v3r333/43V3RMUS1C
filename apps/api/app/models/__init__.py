@@ -10,6 +10,28 @@ from app.models.campaign import Campaign, SocialAccount, SocialPost
 from app.models.workflow import Workflow, RenderJob, AutomationJob, AIPrompt
 from app.models.analytics import AnalyticsEvent, TrendData, PlatformMetric, BrandProfile
 from app.models.system import SystemLog
+from app.models.cognitive import (
+    OrchestrationMemory,
+    StrategicExecutionPlan,
+    CreativeReasoningProfile,
+    AgentGovernanceSession,
+    AgentDecision,
+    RuntimeEvolutionMetric,
+    AdaptiveOptimizationCycle,
+    OrchestrationForecast,
+    SemanticContextArchive,
+    MemoryScope,
+    MemoryKind,
+    PlanStatus,
+    PlanHorizon,
+    StrategyKind,
+    GovernanceRole,
+    GovernanceAction,
+    TuningState,
+    ForecastKind,
+    ForecastHorizon,
+    ArchiveState,
+)
 
 __all__ = [
     # Base
@@ -53,4 +75,28 @@ __all__ = [
     
     # System
     "SystemLog",
+    
+    # Cognitive Kernel
+    "OrchestrationMemory",
+    "StrategicExecutionPlan",
+    "CreativeReasoningProfile",
+    "AgentGovernanceSession",
+    "AgentDecision",
+    "RuntimeEvolutionMetric",
+    "AdaptiveOptimizationCycle",
+    "OrchestrationForecast",
+    "SemanticContextArchive",
+    
+    # Enums
+    "MemoryScope",
+    "MemoryKind",
+    "PlanStatus",
+    "PlanHorizon",
+    "StrategyKind",
+    "GovernanceRole",
+    "GovernanceAction",
+    "TuningState",
+    "ForecastKind",
+    "ForecastHorizon",
+    "ArchiveState",
 ]
