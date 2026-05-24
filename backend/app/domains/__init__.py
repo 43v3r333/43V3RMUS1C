@@ -42,6 +42,33 @@ from .runtime import (
     NodeStatus,
     ExecutionMode,
 )
+from .observability import (
+    TelemetryCollector,
+    RuntimeStateManager,
+    TraceStatus,
+    MetricType,
+    AlertSeverity,
+    ExecutionTrace,
+    TelemetryEvent,
+    RuntimeMetric,
+    OrchestrationMetric,
+    HealthCheck,
+    Alert,
+    LogEntry,
+)
+from .composition import (
+    CompositionEngine,
+    SceneSequencer,
+    CompositionStatus,
+    SceneType,
+    TransitionType,
+    CompositionGraph,
+    CompositionScene,
+    CompositionClip,
+    CompositionTransition,
+    CompositionOverlay,
+    CompositionExecution,
+)
 
 __all__ = [
     # Events
@@ -143,4 +170,31 @@ __all__ = [
     "RuntimeStatus",
     "NodeStatus",
     "ExecutionMode",
+    
+    # Observability
+    "TelemetryCollector",
+    "RuntimeStateManager",
+    "TraceStatus",
+    "MetricType",
+    "AlertSeverity",
+    "ExecutionTrace",
+    "TelemetryEvent",
+    "RuntimeMetric",
+    "OrchestrationMetric",
+    "HealthCheck",
+    "Alert",
+    "LogEntry",
+    
+    # Composition
+    "CompositionEngine",
+    "SceneSequencer",
+    "CompositionStatus",
+    "SceneType",
+    "TransitionType",
+    "CompositionGraph",
+    "CompositionScene",
+    "CompositionClip",
+    "CompositionTransition",
+    "CompositionOverlay",
+    "CompositionExecution",
 ]
