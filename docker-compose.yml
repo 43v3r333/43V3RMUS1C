@@ -140,6 +140,31 @@ services:
     networks:
       - verse-network
 
+  # Media Worker
+  worker-media:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-media
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=media
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+      - media_storage:/app/storage
+    command: celery -A app.workers.celery_app worker -l info -n media_worker -Q media
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
   # Frontend Web Application
   web:
     build:

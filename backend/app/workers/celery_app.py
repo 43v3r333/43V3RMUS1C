@@ -13,6 +13,7 @@ celery_app = Celery(
         "app.workers.render_tasks",
         "app.workers.social_tasks",
         "app.workers.analytics_tasks",
+        "app.workers.media_tasks",
     ]
 )
 
@@ -34,6 +35,7 @@ celery_app.conf.task_routes = {
     "app.workers.render_tasks.*": {"queue": "render"},
     "app.workers.social_tasks.*": {"queue": "social"},
     "app.workers.analytics_tasks.*": {"queue": "analytics"},
+    "app.workers.media_tasks.*": {"queue": "media"},
 }
 
 
