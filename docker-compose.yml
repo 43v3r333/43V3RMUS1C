@@ -165,6 +165,56 @@ services:
     networks:
       - verse-network
 
+  # Runtime Worker
+  worker-runtime:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-runtime
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=runtime
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+    command: celery -A app.workers.celery_app worker -l info -n runtime_worker -Q runtime
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
+  # AI Worker
+  worker-ai:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-ai
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=ai
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+    command: celery -A app.workers.celery_app worker -l info -n ai_worker -Q ai
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
   # Frontend Web Application
   web:
     build:
