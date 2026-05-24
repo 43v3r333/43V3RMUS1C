@@ -30,6 +30,8 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
 // Types
 // =====================================================================
 
+// ---- Knowledge Graph ----
+
 export interface KnowledgeNode {
   id: string
   node_kind: string
@@ -82,11 +84,14 @@ export interface SemanticRelationship {
   created_at: string
 }
 
+// ---- Orchestration Memory ----
+
 export interface OrchestrationMemory {
   id: string
   scope: string
   memory_kind: string
-  subject: string
+  subject?: string
+  subject_kind?: string
   title: string
   content: Record<string, unknown>
   importance: number
@@ -94,12 +99,67 @@ export interface OrchestrationMemory {
   confidence: number
   access_count: number
   last_accessed_at?: string
-  correlation_id?: string
-  workflow_id?: string
-  agent_id?: string
   is_pinned: boolean
+  tags?: string[]
+  execution_context?: Record<string, unknown>
+  outcome?: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface MemoryStatistics {
+  total_memories: number
+  by_scope: Record<string, number>
+  by_kind: Record<string, number>
+  avg_importance: number
+  avg_access_count: number
+  pinned_count: number
+  high_confidence_count: number
+}
+
+export interface ExecutionPattern {
+  subject: string
+  memory_kind: string
+  frequency: number
+  avg_importance: number
+  avg_confidence: number
+  significance: number
+}
+
+// ---- Strategic Planning ----
+
+export interface StrategicPlan {
+  id: string
+  name: string
+  description?: string
+  plan_type: string
+  status: string
+  horizon: string
+  strategy_kind: string
+  objectives: Record<string, unknown>[]
+  dependencies?: Record<string, unknown>[]
+  constraints?: Record<string, unknown>
+  required_resources?: Record<string, unknown>
+  allocated_resources?: Record<string, unknown>
+  estimated_start?: string
+  estimated_end?: string
+  actual_start?: string
+  actual_end?: string
+  confidence_score: number
+  priority: number
   created_at: string
 }
+
+export interface PlanningStatistics {
+  total_plans: number
+  by_status: Record<string, number>
+  by_strategy: Record<string, number>
+  avg_confidence: number
+  active_count: number
+  completed_count: number
+}
+
+// ---- Forecasting ----
 
 export interface ExecutionForecast {
   id: string
@@ -117,6 +177,13 @@ export interface ExecutionForecast {
   realized_at?: string
   error_pct?: number
   lifecycle_state: string
+}
+
+export interface ForecastAccuracy {
+  count: number
+  avg_error: number | null
+  avg_accuracy: number | null
+  by_forecast_kind: Record<string, { count: number; avg_accuracy: number }>
 }
 
 export interface MultiStageGraph {
@@ -144,14 +211,17 @@ export interface StrategyDecision {
   scores: Record<string, number>
 }
 
+// ---- Creative Reasoning ----
+
 export interface CreativeProfile {
   id: string
   name: string
+  profile_type: string
   campaign_id?: string
-  artist_id?: string
   narrative_structure: string
   emotional_arc: string
   pacing_profile: string
+  pacing_intensity?: number
   visual_keywords: string[]
   audio_keywords: string[]
   color_palette: string[]
@@ -159,9 +229,15 @@ export interface CreativeProfile {
   attention_span_seconds: number
   completion_rate_target: number
   engagement_rate_target: number
+  max_duration?: number
+  min_duration?: number
+  content_guidelines?: Record<string, unknown>
+  visual_style?: string
+  music_mood?: string
   is_active: boolean
   version: number
   created_at: string
+  updated_at: string
 }
 
 export interface NarrativeSequence {
@@ -181,6 +257,48 @@ export interface NarrativeSequence {
   is_locked: boolean
   version: number
   created_at: string
+}
+
+export interface EngagementPrediction {
+  predicted_completion_rate: number
+  predicted_engagement_rate: number
+  attention_span_fit: number
+  duration_fit: number
+  visual_alignment: number
+  audio_alignment: number
+  overall_score: number
+  recommendations: string[]
+}
+
+export interface NarrativeAnalysis {
+  structure_compliance: number
+  emotional_arc_compliance: number
+  pacing_score: number
+  segment_assessments: Record<string, unknown>[]
+}
+
+// ---- Multi-Agent Governance ----
+
+export interface GovernanceSession {
+  id: string
+  name: string
+  session_type: string
+  status: string
+  coordinator_id?: string
+  participant_ids: string[]
+  authority_level: string
+  scope_kind?: string
+  scope_id?: string
+  actions_taken?: Record<string, unknown>[]
+  decisions_made?: Record<string, unknown>[]
+  negotiation_rounds: number
+  consensus_reached: boolean
+  disagreements?: Record<string, unknown>[]
+  resolution?: Record<string, unknown>
+  execution_plan?: Record<string, unknown>
+  efficiency_score: number
+  session_start?: string
+  session_end?: string
 }
 
 export interface GovernanceRule {
@@ -224,6 +342,104 @@ export interface ConflictResolution {
   resolved_at?: string
 }
 
+export interface GovernanceStatistics {
+  total_sessions: number
+  by_status: Record<string, number>
+  by_type: Record<string, number>
+  avg_efficiency: number
+  consensus_rate: number
+  active_sessions: number
+  total_decisions: number
+  validated_decisions: number
+}
+
+// ---- Self-Evolution ----
+
+export interface TuningCycle {
+  id: string
+  cycle_id: string
+  name?: string
+  context_key: string
+  target_metric: string
+  target_improvement: number
+  parameter_space?: Record<string, unknown>
+  current_parameters?: Record<string, number>
+  best_parameters?: Record<string, number>
+  max_iterations: number
+  iteration: number
+  current_score?: number
+  best_score?: number
+  baseline_score?: number
+  cycle_state: string
+  exploration_history?: Record<string, unknown>[]
+  exploitation_history?: Record<string, unknown>[]
+  improvements_found?: Record<string, unknown>[]
+  started_at?: string
+  completed_at?: string
+}
+
+export interface TuningRecommendation {
+  parameter_name: string
+  current_value: number
+  recommended_value: number
+  action: string
+  reason: string
+  expected_improvement: number
+  confidence: number
+}
+
+export interface RuntimeMetric {
+  id: string
+  metric_type: string
+  metric_name: string
+  value: number
+  subject_kind?: string
+  subject_id?: string
+  delta?: number
+  delta_percentage?: number
+  change_direction?: string
+  context?: Record<string, unknown>
+  recorded_at: string
+}
+
+export interface MetricTrend {
+  count: number
+  trend: string
+  current: number | null
+  min: number
+  max: number
+  avg: number
+  values: number[]
+  timestamps: string[]
+}
+
+export interface EvolutionStatistics {
+  total_cycles: number
+  by_state: Record<string, number>
+  by_context: Record<string, number>
+  best_score_achieved?: number
+  active_cycles: number
+  converged_cycles: number
+  total_metrics_recorded: number
+}
+
+// ---- Semantic Archives ----
+
+export interface SemanticArchive {
+  id: string
+  name: string
+  archive_type: string
+  domain?: string
+  entities?: Record<string, unknown>
+  relationships?: Record<string, unknown>[]
+  semantic_tags?: string[]
+  use_count: number
+  completeness: number
+  archive_state: string
+}
+
+// ---- Feedback ----
+
 export interface OrchestrationFeedback {
   id: string
   subject_kind: string
@@ -239,28 +455,15 @@ export interface OrchestrationFeedback {
   observed_at: string
 }
 
-export interface TuningCycle {
-  id: string
-  cycle_id: string
-  context_key: string
-  target_metric: string
-  target_improvement: number
-  max_iterations: number
-  iteration: number
-  cycle_state: string
-  best_score?: number
-  started_at: string
-  completed_at?: string
-}
+// ---- Cognitive Summary ----
 
-export interface TuningRecommendation {
-  parameter_name: string
-  current_value: number
-  recommended_value: number
-  action: string
-  reason: string
-  expected_improvement: number
-  confidence: number
+export interface CognitiveSummary {
+  orchestration_memory: MemoryStatistics
+  strategic_planning: PlanningStatistics
+  creative_reasoning: Record<string, unknown>
+  multi_agent_governance: GovernanceStatistics
+  self_evolution: EvolutionStatistics
+  timestamp: string
 }
 
 // =====================================================================
@@ -299,28 +502,124 @@ export function useCognitiveApi() {
 
   // ---- Orchestration Memory ------------------------------------------
 
-  const remember = useCallback(async (data: Partial<OrchestrationMemory>) => {
-    return fetchApi<OrchestrationMemory>('/cognitive/memory', { method: 'POST', body: JSON.stringify(data) })
+  const remember = useCallback(async (data: {
+    scope: string;
+    memory_kind: string;
+    title: string;
+    content: Record<string, unknown>;
+    subject?: string;
+    subject_kind?: string;
+    importance?: number;
+    confidence?: number;
+    tags?: string[];
+  }) => {
+    return fetchApi<{ id: string; status: string }>('/cognitive/memories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
   }, [])
 
-  const recall = useCallback(async (params: { scope?: string; memory_kind?: string; limit?: number } = {}) => {
+  const recall = useCallback(async (params: {
+    subject?: string;
+    scope?: string;
+    memory_kind?: string;
+    subject_kind?: string;
+    min_importance?: number;
+    min_confidence?: number;
+    tags?: string;
+    search_text?: string;
+    limit?: number;
+    offset?: number;
+  } = {}) => {
     const qs = new URLSearchParams()
+    if (params.subject) qs.set('subject', params.subject)
     if (params.scope) qs.set('scope', params.scope)
     if (params.memory_kind) qs.set('memory_kind', params.memory_kind)
+    if (params.subject_kind) qs.set('subject_kind', params.subject_kind)
+    if (params.min_importance) qs.set('min_importance', String(params.min_importance))
+    if (params.min_confidence) qs.set('min_confidence', String(params.min_confidence))
+    if (params.tags) qs.set('tags', params.tags)
+    if (params.search_text) qs.set('search_text', params.search_text)
     if (params.limit) qs.set('limit', String(params.limit))
-    return fetchApi<OrchestrationMemory[]>(`/cognitive/memory?${qs}`)
+    if (params.offset) qs.set('offset', String(params.offset))
+    return fetchApi<{ items: OrchestrationMemory[]; total: number }>(`/cognitive/memories?${qs}`)
+  }, [])
+
+  const getMemoryStats = useCallback(async () => {
+    return fetchApi<MemoryStatistics>('/cognitive/memories/stats')
+  }, [])
+
+  const analyzePatterns = useCallback(async (params: { subject_kind?: string; days?: number; min_frequency?: number } = {}) => {
+    const qs = new URLSearchParams()
+    if (params.subject_kind) qs.set('subject_kind', params.subject_kind)
+    if (params.days) qs.set('days', String(params.days))
+    if (params.min_frequency) qs.set('min_frequency', String(params.min_frequency))
+    return fetchApi<{ patterns: ExecutionPattern[] }>(`/cognitive/memories/patterns?${qs}`)
+  }, [])
+
+  // ---- Strategic Planning ------------------------------------------
+
+  const listPlans = useCallback(async (params: {
+    status?: string;
+    strategy_kind?: string;
+    horizon?: string;
+    min_priority?: number;
+    limit?: number;
+    offset?: number;
+  } = {}) => {
+    const qs = new URLSearchParams()
+    if (params.status) qs.set('status', params.status)
+    if (params.strategy_kind) qs.set('strategy_kind', params.strategy_kind)
+    if (params.horizon) qs.set('horizon', params.horizon)
+    if (params.min_priority) qs.set('min_priority', String(params.min_priority))
+    if (params.limit) qs.set('limit', String(params.limit))
+    if (params.offset) qs.set('offset', String(params.offset))
+    return fetchApi<{ items: StrategicPlan[]; total: number }>(`/cognitive/plans?${qs}`)
+  }, [])
+
+  const getPlan = useCallback(async (planId: string) => {
+    return fetchApi<StrategicPlan>(`/cognitive/plans/${planId}`)
+  }, [])
+
+  const activatePlan = useCallback(async (planId: string, allocatedResources?: Record<string, unknown>) => {
+    return fetchApi<{ status: string; id: string }>(`/cognitive/plans/${planId}/activate`, {
+      method: 'POST',
+      body: JSON.stringify({ allocated_resources: allocatedResources }),
+    })
+  }, [])
+
+  const getPlanningStats = useCallback(async () => {
+    return fetchApi<PlanningStatistics>('/cognitive/plans/stats')
   }, [])
 
   // ---- Forecasting ---------------------------------------------------
 
-  const createForecast = useCallback(async (data: { subject_kind: string; subject_key: string; forecast_kind: string }) => {
-    return fetchApi<ExecutionForecast>('/cognitive/forecast', { method: 'POST', body: JSON.stringify(data) })
+  const createForecast = useCallback(async (data: {
+    subject_kind: string;
+    subject_key: string;
+    forecast_kind: string;
+    predicted_value: number;
+    horizon: string;
+    predicted_for: string;
+    confidence?: number;
+  }) => {
+    return fetchApi<{ id: string; status: string }>('/cognitive/forecasts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
   }, [])
 
   const listActiveForecasts = useCallback(async (params: { limit?: number } = {}) => {
     const qs = new URLSearchParams()
     if (params.limit) qs.set('limit', String(params.limit))
-    return fetchApi<ExecutionForecast[]>(`/cognitive/forecast/active?${qs}`)
+    return fetchApi<{ items: ExecutionForecast[]; total: number }>(`/cognitive/forecasts?${qs}`)
+  }, [])
+
+  const getForecastAccuracy = useCallback(async (params: { subject_kind?: string; days?: number } = {}) => {
+    const qs = new URLSearchParams()
+    if (params.subject_kind) qs.set('subject_kind', params.subject_kind)
+    if (params.days) qs.set('days', String(params.days))
+    return fetchApi<ForecastAccuracy>(`/cognitive/forecasts/accuracy?${qs}`)
   }, [])
 
   const selectStrategy = useCallback(async (data: { subject_kind: string; subject_key: string; context: Record<string, unknown> }) => {
@@ -333,9 +632,30 @@ export function useCognitiveApi() {
 
   // ---- Creative ------------------------------------------------------
 
-  const listCreativeProfiles = useCallback(async (campaignId?: string) => {
-    const qs = campaignId ? `?campaign_id=${campaignId}` : ''
-    return fetchApi<CreativeProfile[]>(`/cognitive/creative/profiles${qs}`)
+  const listCreativeProfiles = useCallback(async (params: { profile_type?: string; is_active?: boolean; limit?: number } = {}) => {
+    const qs = new URLSearchParams()
+    if (params.profile_type) qs.set('profile_type', params.profile_type)
+    if (params.is_active !== undefined) qs.set('is_active', String(params.is_active))
+    if (params.limit) qs.set('limit', String(params.limit))
+    return fetchApi<{ items: CreativeProfile[]; total: number }>(`/cognitive/profiles?${qs}`)
+  }, [])
+
+  const getCreativeProfile = useCallback(async (profileId: string) => {
+    return fetchApi<CreativeProfile>(`/cognitive/profiles/${profileId}`)
+  }, [])
+
+  const analyzeNarrative = useCallback(async (profileId: string, contentSegments: Record<string, unknown>[]) => {
+    return fetchApi<NarrativeAnalysis>(`/cognitive/profiles/${profileId}/analyze`, {
+      method: 'POST',
+      body: JSON.stringify({ content_segments: contentSegments }),
+    })
+  }, [])
+
+  const predictEngagement = useCallback(async (profileId: string, contentData: Record<string, unknown>) => {
+    return fetchApi<EngagementPrediction>(`/cognitive/profiles/${profileId}/predict`, {
+      method: 'POST',
+      body: JSON.stringify(contentData),
+    })
   }, [])
 
   const listNarrativeSequences = useCallback(async (params: { campaign_id?: string; profile_id?: string; limit?: number } = {}) => {
@@ -346,16 +666,54 @@ export function useCognitiveApi() {
     return fetchApi<NarrativeSequence[]>(`/cognitive/creative/sequences?${qs}`)
   }, [])
 
-  const predictEngagement = useCallback(async (audienceSegment: string, contentDuration: number, contentType = 'short_form') => {
-    return fetchApi<{
-      expected_completion_rate: number
-      expected_engagement_score: number
-      first_drop_seconds: number
-      confidence: number
-    }>(`/cognitive/creative/engagement-prediction?audience_segment=${audienceSegment}&content_duration=${contentDuration}&content_type=${contentType}`)
+  // ---- Governance ---------------------------------------------------
+
+  const listSessions = useCallback(async (params: {
+    status?: string;
+    session_type?: string;
+    coordinator_id?: string;
+    scope_kind?: string;
+    limit?: number;
+    offset?: number;
+  } = {}) => {
+    const qs = new URLSearchParams()
+    if (params.status) qs.set('status', params.status)
+    if (params.session_type) qs.set('session_type', params.session_type)
+    if (params.coordinator_id) qs.set('coordinator_id', params.coordinator_id)
+    if (params.scope_kind) qs.set('scope_kind', params.scope_kind)
+    if (params.limit) qs.set('limit', String(params.limit))
+    if (params.offset) qs.set('offset', String(params.offset))
+    return fetchApi<{ items: GovernanceSession[]; total: number }>(`/cognitive/sessions?${qs}`)
   }, [])
 
-  // ---- Governance ---------------------------------------------------
+  const getSession = useCallback(async (sessionId: string) => {
+    return fetchApi<GovernanceSession>(`/cognitive/sessions/${sessionId}`)
+  }, [])
+
+  const addSessionAction = useCallback(async (sessionId: string, actionType: string, agentId: string, actionData: Record<string, unknown>) => {
+    return fetchApi<{ status: string }>(`/cognitive/sessions/${sessionId}/action`, {
+      method: 'POST',
+      body: JSON.stringify({ action_type: actionType, agent_id: agentId, action_data: actionData }),
+    })
+  }, [])
+
+  const reachConsensus = useCallback(async (sessionId: string, consensusData: Record<string, unknown>) => {
+    return fetchApi<{ status: string }>(`/cognitive/sessions/${sessionId}/consensus`, {
+      method: 'POST',
+      body: JSON.stringify(consensusData),
+    })
+  }, [])
+
+  const endSession = useCallback(async (sessionId: string, resolution?: Record<string, unknown>, executionPlan?: Record<string, unknown>) => {
+    return fetchApi<{ status: string; efficiency_score: number }>(`/cognitive/sessions/${sessionId}/end`, {
+      method: 'POST',
+      body: JSON.stringify({ resolution, execution_plan: executionPlan }),
+    })
+  }, [])
+
+  const getGovernanceStats = useCallback(async () => {
+    return fetchApi<GovernanceStatistics>('/cognitive/sessions/stats')
+  }, [])
 
   const listGovernanceRules = useCallback(async (agentKind?: string) => {
     const qs = agentKind ? `?agent_kind=${agentKind}` : ''
@@ -371,24 +729,37 @@ export function useCognitiveApi() {
     return fetchApi<ConflictResolution[]>(`/cognitive/governance/conflicts${qs}`)
   }, [])
 
-  // ---- Feedback -----------------------------------------------------
+  // ---- Self-Evolution ----------------------------------------------
 
-  const ingestFeedback = useCallback(async (data: {
-    subject_kind: string; subject_key: string; feedback_type: string; actual_value: number; workflow_id?: string; execution_start: string
-  }) => {
-    return fetchApi<OrchestrationFeedback>('/cognitive/feedback', { method: 'POST', body: JSON.stringify(data) })
-  }, [])
-
-  const analyzeFeedbackOutcomes = useCallback(async (params: { subject_kind?: string; feedback_type?: string } = {}) => {
+  const listTuningCycles = useCallback(async (params: { cycle_state?: string; context_key?: string; limit?: number } = {}) => {
     const qs = new URLSearchParams()
-    if (params.subject_kind) qs.set('subject_kind', params.subject_kind)
-    if (params.feedback_type) qs.set('feedback_type', params.feedback_type)
-    return fetchApi<Record<string, number>>(`/cognitive/feedback/analysis?${qs}`)
+    if (params.cycle_state) qs.set('cycle_state', params.cycle_state)
+    if (params.context_key) qs.set('context_key', params.context_key)
+    if (params.limit) qs.set('limit', String(params.limit))
+    return fetchApi<{ items: TuningCycle[]; total: number }>(`/cognitive/optimization/cycles?${qs}`)
   }, [])
 
-  const listTuningCycles = useCallback(async (contextKey?: string) => {
-    const qs = contextKey ? `?context_key=${contextKey}` : ''
-    return fetchApi<TuningCycle[]>(`/cognitive/feedback/tuning-cycles${qs}`)
+  const getTuningCycle = useCallback(async (cycleId: string) => {
+    return fetchApi<TuningCycle>(`/cognitive/optimization/cycles/${cycleId}`)
+  }, [])
+
+  const startTuningCycle = useCallback(async (cycleId: string) => {
+    return fetchApi<{ cycle_id: string; status: string }>(`/cognitive/optimization/cycles/${cycleId}/start`, {
+      method: 'POST',
+    })
+  }, [])
+
+  const recordIteration = useCallback(async (cycleId: string, parameters: Record<string, number>, score: number) => {
+    return fetchApi<{
+      cycle_id: string;
+      iteration: number;
+      current_score: number;
+      best_score: number;
+      state: string;
+    }>(`/cognitive/optimization/cycles/${cycleId}/iteration`, {
+      method: 'POST',
+      body: JSON.stringify({ parameters, score }),
+    })
   }, [])
 
   const getTuningRecommendations = useCallback(async (
@@ -397,6 +768,60 @@ export function useCognitiveApi() {
     return fetchApi<TuningRecommendation[]>(
       `/cognitive/feedback/tuning-recommendations?context_key=${contextKey}&parameters=${parameters}&current_values=${JSON.stringify(currentValues)}`
     )
+  }, [])
+
+  const listMetrics = useCallback(async (params: {
+    metric_name?: string;
+    subject_kind?: string;
+    subject_id?: string;
+    metric_type?: string;
+    hours?: number;
+    limit?: number;
+  } = {}) => {
+    const qs = new URLSearchParams()
+    if (params.metric_name) qs.set('metric_name', params.metric_name)
+    if (params.subject_kind) qs.set('subject_kind', params.subject_kind)
+    if (params.subject_id) qs.set('subject_id', params.subject_id)
+    if (params.metric_type) qs.set('metric_type', params.metric_type)
+    if (params.hours) qs.set('hours', String(params.hours))
+    if (params.limit) qs.set('limit', String(params.limit))
+    return fetchApi<{ items: RuntimeMetric[]; total: number }>(`/cognitive/metrics?${qs}`)
+  }, [])
+
+  const getMetricTrend = useCallback(async (metricName: string, subjectId?: string, periodHours = 24) => {
+    const qs = new URLSearchParams()
+    qs.set('metric_name', metricName)
+    if (subjectId) qs.set('subject_id', subjectId)
+    qs.set('period_hours', String(periodHours))
+    return fetchApi<MetricTrend>(`/cognitive/metrics/${metricName}/trend?${qs}`)
+  }, [])
+
+  const getEvolutionStats = useCallback(async () => {
+    return fetchApi<EvolutionStatistics>('/cognitive/optimization/stats')
+  }, [])
+
+  // ---- Semantic Archives -------------------------------------------
+
+  const searchArchives = useCallback(async (params: {
+    query: string;
+    archive_type?: string;
+    domain?: string;
+    tags?: string;
+    limit?: number;
+  }) => {
+    const qs = new URLSearchParams()
+    qs.set('query', params.query)
+    if (params.archive_type) qs.set('archive_type', params.archive_type)
+    if (params.domain) qs.set('domain', params.domain)
+    if (params.tags) qs.set('tags', params.tags)
+    if (params.limit) qs.set('limit', String(params.limit))
+    return fetchApi<{ items: SemanticArchive[]; total: number }>(`/cognitive/archives/search?${qs}`)
+  }, [])
+
+  // ---- Cognitive Summary -------------------------------------------
+
+  const getCognitiveSummary = useCallback(async () => {
+    return fetchApi<CognitiveSummary>('/cognitive/cognitive/summary')
   }, [])
 
   // ---- WebSocket ----------------------------------------------------
@@ -427,24 +852,48 @@ export function useCognitiveApi() {
     // Memory
     remember,
     recall,
+    getMemoryStats,
+    analyzePatterns,
+    // Strategic Planning
+    listPlans,
+    getPlan,
+    activatePlan,
+    getPlanningStats,
     // Forecast
     createForecast,
     listActiveForecasts,
+    getForecastAccuracy,
     selectStrategy,
     createMultiStageGraph,
     // Creative
     listCreativeProfiles,
-    listNarrativeSequences,
+    getCreativeProfile,
+    analyzeNarrative,
     predictEngagement,
+    listNarrativeSequences,
     // Governance
+    listSessions,
+    getSession,
+    addSessionAction,
+    reachConsensus,
+    endSession,
+    getGovernanceStats,
     listGovernanceRules,
     evaluateAction,
     listActiveConflicts,
-    // Feedback
-    ingestFeedback,
-    analyzeFeedbackOutcomes,
+    // Self-Evolution
     listTuningCycles,
+    getTuningCycle,
+    startTuningCycle,
+    recordIteration,
     getTuningRecommendations,
+    listMetrics,
+    getMetricTrend,
+    getEvolutionStats,
+    // Archives
+    searchArchives,
+    // Summary
+    getCognitiveSummary,
     // WebSocket
     createCognitiveSocket,
   }

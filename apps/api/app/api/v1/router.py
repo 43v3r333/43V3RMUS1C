@@ -10,6 +10,7 @@ from .endpoints.assets import router as assets_router
 from .endpoints.workflows import router as workflows_router, prompts_router, render_jobs_router
 from .endpoints.campaigns import router as campaigns_router, social_accounts_router, social_posts_router
 from .endpoints.health import router as health_router
+from .endpoints.cognitive import router as cognitive_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -26,3 +27,4 @@ api_router.include_router(prompts_router, prefix="/prompts", tags=["AI Prompts"]
 api_router.include_router(campaigns_router, prefix="/campaigns", tags=["Campaigns"])
 api_router.include_router(social_accounts_router, prefix="/social-accounts", tags=["Social Accounts"])
 api_router.include_router(social_posts_router, prefix="/social-posts", tags=["Social Posts"])
+api_router.include_router(cognitive_router, tags=["Cognitive Kernel"])
