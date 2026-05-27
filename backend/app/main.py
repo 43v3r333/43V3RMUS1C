@@ -53,6 +53,9 @@ def _register_domains():
             creative,
             governance,
             feedback,
+            coherence,
+            runtime,
+            observability,
         )
         logger.info("All cognitive domain modules registered")
     except Exception as e:

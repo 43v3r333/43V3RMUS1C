@@ -295,7 +295,7 @@ __all__ = [
     "ProviderHealth",
     "IntelGenerationRequest",
     "IntelGenerationResponse",
-)
+]
 from .cognitive import (
     OrchestrationReasoningEngine,
     AdaptiveScheduler as CognitiveAdaptiveScheduler,
