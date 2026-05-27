@@ -11,6 +11,7 @@ from .endpoints.workflows import router as workflows_router, prompts_router
 from .endpoints.health import router as health_router
 from .endpoints.cognitive import router as cognitive_router
 from .coherence import router as coherence_router
+from .execution_fabric import router as execution_fabric_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -25,3 +26,4 @@ api_router.include_router(prompts_router)
 api_router.include_router(health_router)
 api_router.include_router(cognitive_router)
 api_router.include_router(coherence_router)
+api_router.include_router(execution_fabric_router)
