@@ -20,6 +20,7 @@ import {
   Gauge,
   Shield,
   Zap,
+  Eye,
 } from 'lucide-react'
 
 const navigation = [
@@ -40,6 +41,13 @@ const cognitiveNavigation = [
   { name: 'Creative Monitor', href: '/cognitive/creative', icon: Sparkles },
   { name: 'Governance', href: '/cognitive/governance', icon: Shield },
   { name: 'Optimization', href: '/cognitive/optimization', icon: Gauge },
+  { name: 'Meta-Cognition', href: '/cognitive/meta-cognition', icon: Zap },
+  { name: 'Runtime Self-Awareness', href: '/cognitive/meta-cognition/runtime-self-awareness', icon: Eye },
+  { name: 'Orchestration Introspection', href: '/cognitive/meta-cognition/orchestration-introspection', icon: Layers },
+  { name: 'Semantic Consistency', href: '/cognitive/meta-cognition/semantic-consistency', icon: Shield },
+  { name: 'Cognitive Reconciliation', href: '/cognitive/meta-cognition/cognitive-reconciliation', icon: Network },
+  { name: 'Predictive Cognition', href: '/cognitive/meta-cognition/predictive-cognition', icon: TrendingUp },
+  { name: 'Distributed Governance', href: '/cognitive/meta-cognition/distributed-governance', icon: Shield },
 ]
 
 export function Sidebar() {

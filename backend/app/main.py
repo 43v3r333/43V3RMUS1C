@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.api.v1.router import api_router
 from app.api.v1.websocket_cognitive import router as cognitive_ws_router
+from app.api.v1.meta_cognition.websocket_handlers import ws_manager
 
 # Configure logging
 _JSON_LOG_FORMAT = '{"time":"%(asctime)s","level":"%(levelname)s","logger":"%(name)s","message":"%(message)s"}'
@@ -35,8 +36,14 @@ async def lifespan(app: FastAPI):
     # to ensure they are connected to the metadata
     _register_domains()
 
+    # Initialize WebSocket managers
+    await ws_manager.initialize()
+    logger.info("Meta-cognition WebSocket manager initialized")
+
     yield
 
+    # Shutdown WebSocket managers
+    await ws_manager.shutdown()
     logger.info(f"Shutting down {settings.app_name}")
 
 
@@ -56,6 +63,7 @@ def _register_domains():
             coherence,
             runtime,
             observability,
+            meta_cognition,
         )
         logger.info("All cognitive domain modules registered")
     except Exception as e:
