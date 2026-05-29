@@ -12,6 +12,7 @@ from .endpoints.campaigns import router as campaigns_router, social_accounts_rou
 from .endpoints.health import router as health_router
 from .endpoints.cognitive import router as cognitive_router
 from .endpoints.evolution import router as evolution_router
+from .endpoints.constitutional import router as constitutional_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -30,3 +31,4 @@ api_router.include_router(social_accounts_router, prefix="/social-accounts", tag
 api_router.include_router(social_posts_router, prefix="/social-posts", tags=["Social Posts"])
 api_router.include_router(cognitive_router, tags=["Cognitive Kernel"])
 api_router.include_router(evolution_router, tags=["Evolution Governance"])
+api_router.include_router(constitutional_router, tags=["Constitutional Governance"])
