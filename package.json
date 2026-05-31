@@ -1,0 +1,46 @@
+# ===============================================
+# 43V3R CORE - Monorepo Root Configuration
+# ===============================================
+{
+  "name": "@versemusic/monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "43V3R CORE - Autonomous Media Operating System",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:api": "npm run dev --workspace=@versemusic/api",
+    "dev:web": "npm run dev --workspace=@versemusic/web",
+    "build": "turbo run build",
+    "build:api": "npm run build --workspace=@versemusic/api",
+    "build:web": "npm run build --workspace=@versemusic/web",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,py,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:migrate": "npm run migrate --workspace=@versemusic/api",
+    "db:seed": "npm run seed --workspace=@versemusic/api"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.11",
+    "turbo": "^1.12.5",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "npm@9.0.0",
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ]
+  }
+}

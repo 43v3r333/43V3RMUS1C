@@ -1,0 +1,248 @@
+# ===============================================
+# Docker Compose - Development Environment
+# ===============================================
+# 43V3R CORE - Monorepo Architecture
+# Services: PostgreSQL, Redis, API, Workers, Frontend
+# ===============================================
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: verse-postgres
+    environment:
+      POSTGRES_DB: verse
+      POSTGRES_USER: verse
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U verse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - verse-network
+
+  # Redis Cache & Message Broker
+  redis:
+    image: redis:7-alpine
+    container_name: verse-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - verse-network
+
+  # API Backend
+  api:
+    build:
+      context: ./apps/api
+      # API Backend
+        api:
+          build:
+            context: ./backend
+            dockerfile: ../infrastructure/docker/api.Dockerfile
+          container_name: verse-api
+          environment:
+            - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+            - REDIS_URL=redis://redis:6379/0
+          depends_on:
+            postgres:
+              condition: service_healthy
+            redis:
+              condition: service_healthy
+          volumes:
+            - ./backend:/app
+            - media_storage:/app/storage
+          command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+          networks:
+            - verse-network
+
+  # Render Worker
+  worker-render:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-render
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=render
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+      - media_storage:/app/storage
+    command: celery -A app.workers.celery_app worker -l info -n render_worker -Q render
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
+  # Social Tasks Worker
+  worker-social:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-social
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=social
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+    command: celery -A app.workers.celery_app worker -l info -n social_worker -Q social
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
+  # Analytics Worker
+  worker-analytics:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-analytics
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=analytics
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+    command: celery -A app.workers.celery_app worker -l info -n analytics_worker -Q analytics
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
+  # Media Worker
+  worker-media:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-media
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=media
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+      - media_storage:/app/storage
+    command: celery -A app.workers.celery_app worker -l info -n media_worker -Q media
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
+  # Runtime Worker
+  worker-runtime:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-runtime
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=runtime
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+    command: celery -A app.workers.celery_app worker -l info -n runtime_worker -Q runtime
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
+  # AI Worker
+  worker-ai:
+    build:
+      context: ./apps/api
+      dockerfile: ../../infrastructure/docker/api.Dockerfile
+    container_name: verse-worker-ai
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_TYPE=ai
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app
+    command: celery -A app.workers.celery_app worker -l info -n ai_worker -Q ai
+    profiles:
+      - workers
+    networks:
+      - verse-network
+
+  # Frontend Web Application
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: ../../infrastructure/docker/web.Dockerfile
+    container_name: verse-web
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    networks:
+      - verse-network
+
+# Volume definitions
+volumes:
+  postgres_data:
+  redis_data:
+  media_storage:
+
+# Network definitions
+networks:
+  verse-network:
+    driver: bridge

@@ -1,0 +1,31 @@
+{
+  "arbitration_sessions": [
+    "backend/app\\domains\\adaptive_arbitration\\models.py",
+    "backend/app\\domains\\constitutional_arbitration\\models.py"
+  ],
+  "orchestration_stability_metrics": [
+    "backend/app\\domains\\coherence\\models.py",
+    "backend/app\\domains\\predictive_observability\\models.py"
+  ],
+  "execution_forecasts": [
+    "backend/app\\domains\\coherence\\models.py",
+    "backend/app\\domains\\forecasting\\models.py"
+  ],
+  "anomaly_detections": [
+    "backend/app\\domains\\coherence\\models.py",
+    "backend/app\\domains\\learning\\models.py",
+    "backend/app\\domains\\self_healing\\models.py"
+  ],
+  "distributed_context_states": [
+    "backend/app\\domains\\coherence\\models.py",
+    "backend/app\\domains\\distributed_runtime\\models.py"
+  ],
+  "arbitration_policies": [
+    "backend/app\\domains\\executive_coordination\\models.py",
+    "backend/app\\domains\\governance\\models.py"
+  ],
+  "health_checks": [
+    "backend/app\\domains\\observability\\models.py",
+    "backend/app\\domains\\self_healing\\models.py"
+  ]
+}

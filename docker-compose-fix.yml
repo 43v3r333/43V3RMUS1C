@@ -1,0 +1,107 @@
+# ===============================================
+# Docker Compose - Development Environment
+# ===============================================
+# 43V3R CORE - Monorepo Architecture
+# Services: PostgreSQL, Redis, API, Workers, Frontend
+# ===============================================
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: verse-postgres
+    environment:
+      POSTGRES_DB: verse
+      POSTGRES_USER: verse
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U verse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - verse-network
+
+  # Redis Cache & Message Broker
+  redis:
+    image: redis:7-alpine
+    container_name: verse-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - verse-network
+
+  # API Backend (using backend/ folder)
+  api:
+    build:
+      context: ./backend
+      dockerfile: ../infrastructure/docker/api.Dockerfile
+    container_name: verse-api
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://verse:${POSTGRES_PASSWORD:-changeme}@postgres:5432/verse
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-changeme-dev-key}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=verse
+      - POSTGRES_USER=verse
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - media_storage:/app/storage
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - verse-network
+
+  # Frontend Web Application
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: ../../infrastructure/docker/web.Dockerfile
+    container_name: verse-web
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    networks:
+      - verse-network
+
+# Volume definitions
+volumes:
+  postgres_data:
+  redis_data:
+  media_storage:
+
+# Network definitions
+networks:
+  verse-network:
+    driver: bridge

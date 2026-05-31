@@ -1,0 +1,18 @@
+[Unit]
+Description=43V3R CORE Health Monitor
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=p3rc
+WorkingDirectory=/c/Users/p3rc/Desktop/newdev/43V3RMUS1C/43V3RMUS1C/backend
+Environment=PATH=/c/Users/p3rc/Desktop/newdev/43V3RMUS1C/43V3RMUS1C/backend/.venv/Scripts:/c/Users/p3rc/Desktop/newdev/43V3RMUS1C/43V3RMUS1C/backend:/usr/bin
+ExecStart=/c/Users/p3rc/Desktop/newdev/43V3RMUS1C/43V3RMUS1C/backend/.venv/Scripts/python health_monitor.py --interval 60 --no-alerts
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

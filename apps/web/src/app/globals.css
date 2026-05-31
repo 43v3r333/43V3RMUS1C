@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 43V3R CORE - Cinematic Dark Theme */
+    --background: 240 6% 5%;        /* #0c0c0e - Deep black */
+    --foreground: 0 0%98%;          /* #fafafa - Near white */
+    
+    /* Card */
+    --card: 240 5% 7%;              /* #131315 - Slightly elevated */
+    --card-foreground: 0 0%98%;
+    
+    /* Popover */
+    --popover: 240 5% 7%;
+    --popover-foreground: 0 0%98%;
+    
+    /* Primary - Orange accent */
+    --primary: 24 95% 53%;          /* #f97316 - V3 Orange */
+    --primary-foreground: 0 0%98%;
+    
+    /* Secondary */
+    --secondary: 240 4% 12%;        /* #1f1f23 */
+    --secondary-foreground: 0 0%98%;
+    
+    /* Muted */
+    --muted: 240 4% 16%;            /* #2a2a2f */
+    --muted-foreground: 240 4% 64%; /* #a1a1aa */
+    
+    /* Accent */
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0%98%;
+    
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0%98%;
+    
+    /* Border & Input */
+    --border: 240 4% 20%;           /* #35353a */
+    --input: 240 4% 16%;
+    --ring: 24 95% 53%;             /* Primary ring */
+    
+    /* Status colors */
+    --success: 142 76% 36%;
+    --warning: 45 93% 47%;
+    --info: 199 89% 48%;
+    
+    /* Border radius */
+    --radius: 4px;
+  }
+  
+  /* Base styles */
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    @apply antialiased;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
+  }
+  
+  h1 { @apply text-3xl; }
+  h2 { @apply text-2xl; }
+  h3 { @apply text-xl; }
+  h4 { @apply text-lg; }
+  
+  /* Links */
+  a {
+    @apply transition-colors duration-150;
+  }
+  
+  /* Focus styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  
+  /* Selection */
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+  
+  /* Custom scrollbar - Production grade */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.3);
+  }
+  
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) hsl(var(--background));
+  }
+}
