@@ -1,0 +1,74 @@
+[
+  {
+    "endpoint": "GET /health",
+    "description": "Health check",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "POST /identities",
+    "description": "Create identity",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "GET /identities/test/test_identity",
+    "description": "Get identity by scope/key",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "POST /contexts/test_identity",
+    "description": "Create context",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "GET /contexts/test_identity/test_context",
+    "description": "Get context",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "POST /memory/test_identity",
+    "description": "Create memory",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "GET /memory/test_identity",
+    "description": "Get all memory",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "POST /graphs",
+    "description": "Create graph",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "POST /profiles",
+    "description": "Create profile",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "GET /governance/rules",
+    "description": "List governance rules",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "GET /forecast/status",
+    "description": "Forecast status",
+    "status": "FAIL",
+    "http_code": 0
+  },
+  {
+    "endpoint": "GET /self-status",
+    "description": "Self status",
+    "status": "FAIL",
+    "http_code": 0
+  }
+]

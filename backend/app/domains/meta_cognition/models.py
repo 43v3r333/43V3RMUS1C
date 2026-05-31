@@ -371,7 +371,7 @@ class RuntimeSelfAwarenessMetrics(BaseModel):
     
     # Context
     metric_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
+    metadata_: Mapped[Optional[Dict[str, Any]]] = mapped_column("metadata", JSON, nullable=True)
     
     # Timing
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
@@ -470,7 +470,7 @@ class OrchestrationReasoningLineage(BaseModel):
     
     # Context
     decision_context: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
+    metadata_: Mapped[Optional[Dict[str, Any]]] = mapped_column("metadata", JSON, nullable=True)
     
     # Validation
     validation_result: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)

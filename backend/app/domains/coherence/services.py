@@ -63,11 +63,11 @@ from .models import (
     
     # Stability & Prediction
     OrchestrationStabilityMetrics,
-    ExecutionForecast,
-    AnomalyDetection,
+    # ExecutionForecast removed - moved to forecasting.models
+    # AnomalyDetection removed - moved to predictive_observability.models
     
     # Distributed Coordination
-    DistributedContextState,
+    # DistributedContextState removed - moved to distributed_runtime.models
     AgentConsensus,
     AuthorityDelegation,
 )

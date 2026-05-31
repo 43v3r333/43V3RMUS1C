@@ -847,6 +847,57 @@ class AuthorityDelegation(BaseModel):
     revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 
+
+# ---------------------------------------------------------------------------
+# Deprecated / Moved Models (Stubs to prevent import errors)
+# ---------------------------------------------------------------------------
+
+
+class ExecutionForecast:
+    """DEPRECATED: ExecutionForecast moved to domains.forecasting.models.
+    
+    This stub exists to prevent import errors in services that still reference it.
+    Import from domains.forecasting.models instead.
+    """
+    __table__ = None
+    
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError(
+            "ExecutionForecast has moved to domains.forecasting.models. "
+            "Update your imports accordingly."
+        )
+
+
+class AnomalyDetection:
+    """DEPRECATED: AnomalyDetection moved to domains.predictive_observability.models.
+    
+    This stub exists to prevent import errors in services that still reference it.
+    Import from domains.predictive_observability.models instead.
+    """
+    __table__ = None
+    
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError(
+            "AnomalyDetection has moved to domains.predictive_observability.models. "
+            "Update your imports accordingly."
+        )
+
+
+class DistributedContextState:
+    """DEPRECATED: DistributedContextState moved to domains.distributed_runtime.models.
+    
+    This stub exists to prevent import errors in services that still reference it.
+    Import from domains.distributed_runtime.models instead.
+    """
+    __table__ = None
+    
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError(
+            "DistributedContextState has moved to domains.distributed_runtime.models. "
+            "Update your imports accordingly."
+        )
+
+
 __all__ = [
     # Enums
     "IdentityScope",
@@ -887,10 +938,11 @@ __all__ = [
     
     # Stability & Prediction
     "OrchestrationStabilityMetrics",
-    "ExecutionForecast",
-    "AnomalyDetection",
+    # "ExecutionForecast" - moved to forecasting.models
+    # "AnomalyDetection" - moved to predictive_observability.models
     
     # Distributed Coordination
-    "DistributedContextState",
+    # "DistributedContextState" - moved to distributed_runtime.models
     "AgentConsensus",
-    "AuthorityDelegation",
+    "AuthorityDelegation",
+]

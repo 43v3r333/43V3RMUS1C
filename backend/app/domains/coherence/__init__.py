@@ -42,11 +42,11 @@ from .models import (
     
     # Stability & Prediction
     OrchestrationStabilityMetrics,
-    ExecutionForecast,
-    AnomalyDetection,
+    # ExecutionForecast removed - moved to forecasting.models
+    # AnomalyDetection removed - moved to predictive_observability.models
     
     # Distributed Coordination
-    DistributedContextState,
+    # DistributedContextState removed - moved to distributed_runtime.models
     AgentConsensus,
     AuthorityDelegation,
     
@@ -60,8 +60,9 @@ from .models import (
     StabilityStatus,
     ConsensusState,
     ExecutionHorizon,
-    
-    # Services
+)
+
+from .services import (
     UnifiedIdentityManager,
     CognitiveContinuityEngine,
     SemanticCoordinator,
@@ -72,43 +73,29 @@ from .models import (
 )
 
 __all__ = [
-    # Identity & Lineage
+    # Models
     "RuntimeIdentity",
     "OrchestrationLineage",
     "ExecutionLineageNode",
     "RuntimeContext",
-    
-    # Cognitive Memory
     "CognitiveMemoryItem",
     "MemoryFragment",
     "ContextSnapshot",
-    
-    # Semantic Execution
     "SemanticExecutionGraph",
     "SemanticNode",
     "SemanticEdge",
-    
-    # Adaptive Runtime
     "AdaptiveProfile",
     "OptimizationMetric",
     "ExecutionTuningHistory",
-    
-    # Governance
     "GovernancePolicy",
     "PolicyViolation",
     "ArbitrationRecord",
-    
-    # Stability & Prediction
     "OrchestrationStabilityMetrics",
-    "ExecutionForecast",
-    "AnomalyDetection",
-    
-    # Distributed Coordination
-    "DistributedContextState",
+    # "ExecutionForecast" - moved to forecasting.models
+    # "AnomalyDetection" - moved to predictive_observability.models
+    # "DistributedContextState" - moved to distributed_runtime.models
     "AgentConsensus",
     "AuthorityDelegation",
-    
-    # Enums
     "IdentityScope",
     "LineageEventType",
     "MemoryRetrievalMode",
